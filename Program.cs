@@ -2,24 +2,31 @@ using Microsoft.EntityFrameworkCore;
 using API.Data;
 using API.Interfaces;
 using API.Repository;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+        .AddCookie(options =>
+        {
+            options.LoginPath = "/steam-signin";
+            options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
+            options.LogoutPath = "/steam-signout";
+        })
+    .AddSteam(options => {
+        options.ClaimsIssuer = "Steam";
+    });
 
 builder.Services.AddTransient<IUserRepository, UserRepository>();
 builder.Services.AddDbContext<AppDbContext>(options =>
         options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -31,5 +38,8 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
-
+app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers();
 app.Run();

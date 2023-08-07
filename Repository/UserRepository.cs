@@ -7,10 +7,10 @@ namespace API.Repository
 {
     public class UserRepository : IUserRepository
     {
-        private AppDbContext _context;
+        private readonly AppDbContext _context;
         public UserRepository(AppDbContext _context) => this._context = _context;
 
-        public async Task CreateAsync(User user)
+        public async Task CreateUserAsync(User user)
         {
             await _context.AddAsync(user);
             await _context.SaveChangesAsync();
@@ -19,6 +19,11 @@ namespace API.Repository
         public async Task<User?> GetByEmailAsync(string email)
         {
             return await _context.Users.FirstOrDefaultAsync(x => x.Email == email!);
+        }
+
+        public async Task<List<User>> GetUsersAsync()
+        {
+            return await _context.Users.ToListAsync();
         }
     }
 }

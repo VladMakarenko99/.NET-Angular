@@ -8,8 +8,10 @@ namespace API.Interfaces
 {
     public interface IUserRepository
     {
+        public Task<List<User>> GetUsersAsync();
+
         public Task<User?> GetByEmailAsync(string email);
         
-        public Task CreateAsync(User user);
+        public Task CreateUserAsync(User user);
     }
 }
