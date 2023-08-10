@@ -1,10 +1,5 @@
-using API.Interfaces;
-using API.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using SteamWebAPI2;
 using SteamWebAPI2.Interfaces;
-using SteamWebAPI2.Mappings;
 using SteamWebAPI2.Utilities;
 
 namespace API.Controllers
@@ -12,7 +7,9 @@ namespace API.Controllers
     [Route("[controller]")]
     public class SteamController : Controller
     {
-        private const string apiKey = "B85693F3DAA739B3C53C95ABC6E63B64";
+        private readonly IConfiguration _configuration;
+        public SteamController(IConfiguration _configuration) => this._configuration = _configuration;
+        
 
         [HttpGet]
         [Route("/api/games/{steamId}")]
@@ -20,12 +17,13 @@ namespace API.Controllers
         {
             try
             {
+                string apiKey = _configuration["SteamApiKey"] ?? "";
                 var steamWebInterfaceFactory = new SteamWebInterfaceFactory(apiKey);
                 var playerService = steamWebInterfaceFactory.CreateSteamWebInterface<SteamUser>();
-                var games =  await playerService.GetCommunityProfileAsync(steamId);
+                var user =  await playerService.GetCommunityProfileAsync(steamId);
 
-                Console.WriteLine(games.RealName);
-                return Ok(games);
+                Console.WriteLine(user.Summary);
+                return Ok(user);
             }
             catch (Exception ex)
             {

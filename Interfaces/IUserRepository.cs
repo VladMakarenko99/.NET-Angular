@@ -10,8 +10,10 @@ namespace API.Interfaces
     {
         public Task<List<User>> GetUsersAsync();
 
-        public Task<User?> GetByEmailAsync(string email);
+        public Task<User?> GetBySteamIdAsync(string steamId);
         
         public Task CreateUserAsync(User user);
+
+        public Task<bool> TryBuyServiceAsync(int serviceId, int userId);
     }
 }

@@ -3,19 +3,19 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 namespace API.Models;
 public class User
 {
-
     public int Id { get; set; }
 
-    public string? Email { get; set; }
+    public string SteamId { get; set; }
 
-    public User()
-    {
-    }
+    public string SteamName { get; set; }
 
-    public User(string email)
+    public string? BoughtServicesJson { get; set; }
+
+    
+    public User(string SteamId, string SteamName, string? BoughtServicesJson)
     {
-        Email = email;
+        this.SteamId = SteamId;
+        this.SteamName = SteamName;
+        this.BoughtServicesJson = BoughtServicesJson;
     }
 }
-
-

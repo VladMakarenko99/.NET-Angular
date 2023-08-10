@@ -7,6 +7,7 @@ public class AppDbContext : DbContext
 {
     public DbSet<User> Users { get; set; } = null!;
     
+    public DbSet<Service> Services { get; set; } = null!;
 
     public AppDbContext(DbContextOptions<AppDbContext> option) : base(option) { }
 

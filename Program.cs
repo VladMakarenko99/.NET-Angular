@@ -14,7 +14,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         .AddCookie(options =>
         {
             options.LoginPath = "/steam-signin";
-            options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
+            options.ExpireTimeSpan = TimeSpan.FromHours(12);
             options.LogoutPath = "/steam-signout";
         })
     .AddSteam(options => {
@@ -22,6 +22,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     });
 
 builder.Services.AddTransient<IUserRepository, UserRepository>();
+builder.Services.AddTransient<IServiceRepository, ServiceRepository>();
+
 builder.Services.AddDbContext<AppDbContext>(options =>
         options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 

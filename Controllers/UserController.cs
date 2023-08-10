@@ -9,9 +9,9 @@ namespace API.Controllers
     {
         private readonly IUserRepository _repository;
 
-        public UserController(IUserRepository _repository)
+        public UserController(IUserRepository _userRepository)
         {
-            this._repository = _repository;
+            this._repository = _userRepository;
         }
 
         [HttpGet]
@@ -20,19 +20,27 @@ namespace API.Controllers
         {
             return Ok(await _repository.GetUsersAsync());
         }
+        [HttpGet]
+        [Route("/api/user/{steamId}")]
+        public async Task<IActionResult> GetUserBySteamId(string steamId)
+        {
+            var user = await _repository.GetBySteamIdAsync(steamId);
+            if (user == null)
+                return BadRequest("User could not be found");
+
+            return Ok(user);
+        }
 
         [HttpPost]
-        [Route("/api/create")]
-        public async Task<IActionResult> CreateUser([FromBody] User user)
+        [Route("/api/buy-service")]
+        public async Task<IActionResult> BuyService([FromBody] Purchase purchase)
         {
             try
             {
-                if (ModelState.IsValid)
-                {
-                    await _repository.CreateUserAsync(user);
-                    return Ok("User has been successfully created");
-                }
-                return BadRequest(ModelState);
+                if(await _repository.TryBuyServiceAsync(purchase.ServiceId, purchase.UserId))
+                    return Ok("Purchase has been successfully completed");
+                else
+                    return BadRequest("Incorrect service id or user id");
             }
             catch (Exception ex)
             {
