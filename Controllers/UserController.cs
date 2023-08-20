@@ -21,7 +21,7 @@ namespace API.Controllers
             return Ok(await _repository.GetUsersAsync());
         }
         [HttpGet]
-        [Route("/api/user/{steamId}")]
+        [Route("/api/users/{steamId}")]
         public async Task<IActionResult> GetUserBySteamId(string steamId)
         {
             var user = await _repository.GetBySteamIdAsync(steamId);
@@ -29,23 +29,6 @@ namespace API.Controllers
                 return BadRequest("User could not be found");
 
             return Ok(user);
-        }
-
-        [HttpPost]
-        [Route("/api/buy-service")]
-        public async Task<IActionResult> BuyService([FromBody] Purchase purchase)
-        {
-            try
-            {
-                if(await _repository.TryBuyServiceAsync(purchase.ServiceId, purchase.UserId))
-                    return Ok("Purchase has been successfully completed");
-                else
-                    return BadRequest("Incorrect service id or user id");
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.InnerException);
-            }
         }
     }
 }

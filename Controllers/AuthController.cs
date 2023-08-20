@@ -23,7 +23,7 @@ public class AuthController : Controller
     [Route("/steam-signin")]
     public IActionResult SteamSignIn()
     {
-        if (User.Identity.IsAuthenticated)
+        if (User!.Identity!.IsAuthenticated)
             return BadRequest("User is already signed in");
 
         var authProperties = new AuthenticationProperties
@@ -59,7 +59,7 @@ public class AuthController : Controller
 
         if (await _repository.GetBySteamIdAsync(steamId) == null)
         {
-            var user = new User(steamId, steamName, null);
+            var user = new User(steamId, steamName, null, 0);
 
             await _repository.CreateUserAsync(user);
             return Ok($"User has been created and successfully authenticated. SteamId: {steamId}; SteamName: {steamName}");

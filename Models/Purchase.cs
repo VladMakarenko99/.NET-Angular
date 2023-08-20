@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -7,8 +8,50 @@ namespace API.Models
 {
     public class Purchase
     {
-        public int ServiceId { get; set; }
+        [Required(ErrorMessage = "The 'service' field is required.")]
+        public Service Service { get; set; }
 
-        public int UserId { get; set; }
+        [Required(ErrorMessage = "The 'steamId' field is required.")]
+        public string SteamId { get; set; }
+
+        public Purchase(Service service, string steamId)
+        {
+            this.Service = service;
+            this.SteamId = steamId;
+        }
+    }
+    public class Order
+    {
+        public string Id { get; set; }
+
+        [Required(ErrorMessage = "The 'amount' field is required.")]
+        public double Amount { get; set; }
+
+        [Required(ErrorMessage = "The 'steamId' field is required.")]
+        public string SteamId { get; set; }
+
+        public string Status { get; set; }
+
+        public Order(string Id, double Amount, string SteamId, string Status)
+        {
+            this.Id = Id;
+            this.Amount = Amount;
+            this.SteamId = SteamId;
+            this.Status = Status;
+        }
+    }
+    public class TopUpPurchase
+    {
+        [Required(ErrorMessage = "The 'amount' field is required.")]
+        public double Amount { get; set; }
+
+        [Required(ErrorMessage = "The 'steamId' field is required.")]
+        public string SteamId { get; set; }
+
+        public TopUpPurchase(double amount, string steamId)
+        {
+            this.Amount = amount;
+            this.SteamId = steamId;
+        }
     }
 }

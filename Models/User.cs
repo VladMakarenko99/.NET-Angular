@@ -11,11 +11,12 @@ public class User
 
     public string? BoughtServicesJson { get; set; }
 
-    
-    public User(string SteamId, string SteamName, string? BoughtServicesJson)
+    public double Balance { get; set; }
+    public User(string SteamId, string SteamName, string? BoughtServicesJson, double Balance)
     {
         this.SteamId = SteamId;
         this.SteamName = SteamName;
         this.BoughtServicesJson = BoughtServicesJson;
+        this.Balance = Balance;
     }
 }

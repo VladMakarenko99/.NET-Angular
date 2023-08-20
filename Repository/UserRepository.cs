@@ -26,33 +26,5 @@ namespace API.Repository
         {
             return await _context.Users.ToListAsync();
         }
-
-        public async Task<bool> TryBuyServiceAsync(int serviceId, int userId)
-        {
-            var user = await _context.Users.FindAsync(userId);
-            var service = await _context.Services.FindAsync(serviceId);
-            if(user == null || service == null)
-                return false;
-            var serviceList = new List<Service>();
-
-            if (user!.BoughtServicesJson == null)
-                await UpdateUserBoughtServicesAsync(user, service!, serviceList);
-
-            else
-            {
-                serviceList = JsonSerializer.Deserialize<List<Service>>(user.BoughtServicesJson);
-                await UpdateUserBoughtServicesAsync(user, service!, serviceList!);
-            }
-            return true;
-        }
-
-        private async Task UpdateUserBoughtServicesAsync(User userToUpdate, Service service, List<Service> serviceList)
-        {
-            serviceList!.Add(service!);
-            string serviceListJson = JsonSerializer.Serialize(serviceList);
-            userToUpdate.BoughtServicesJson = serviceListJson;
-            _context.Update(userToUpdate);
-            await _context.SaveChangesAsync();
-        }
     }
 }
