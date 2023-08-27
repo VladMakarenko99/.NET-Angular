@@ -1,6 +1,11 @@
 using API.Interfaces;
 using API.Models;
+using AspNet.Security.OpenId.Steam;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Encodings.Web;
+using System.Text.Json;
+using System.Text.Unicode;
 
 namespace API.Controllers
 {
@@ -22,6 +27,7 @@ namespace API.Controllers
         }
         [HttpGet]
         [Route("/api/users/{steamId}")]
+        [Authorize(AuthenticationSchemes = SteamAuthenticationDefaults.AuthenticationScheme)]
         public async Task<IActionResult> GetUserBySteamId(string steamId)
         {
             var user = await _repository.GetBySteamIdAsync(steamId);

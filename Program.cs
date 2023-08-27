@@ -3,6 +3,7 @@ using API.Data;
 using API.Interfaces;
 using API.Repository;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Cors;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,9 +26,12 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
             options.ExpireTimeSpan = TimeSpan.FromHours(12);
             options.LogoutPath = "/steam-signout";
         })
-    .AddSteam(options => {
+    .AddSteam(options =>
+    {
         options.ClaimsIssuer = "Steam";
     });
+builder.Services.AddCors();
+
 
 builder.Services.AddTransient<IUserRepository, UserRepository>();
 builder.Services.AddTransient<IServiceRepository, ServiceRepository>();
@@ -49,6 +53,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAuthorization();
 
+app.UseCors(options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+//app.UseMvc();
 app.MapControllers();
 app.UseAuthentication();
 app.UseAuthorization();

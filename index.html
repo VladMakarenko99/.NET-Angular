@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fetch and Display Data</title>
+</head>
+
+<body>
+    <div id="dataContainer">
+        <!-- Fetched data will be displayed here -->
+    </div>
+
+    <script>
+        function decodeUnicodeEscapeSequence(str) {
+            if (!str) {
+                return ''; // Return an empty string if the input is undefined or empty
+            }
+            return str.replace(/\\u([\dA-F]{4})/gi, (match, p1) => String.fromCharCode(parseInt(p1, 16)));
+        }
+        // Fetch the URL
+        fetch('https://asmodeus.bsite.net/api/users/76561198862541758')
+            .then(response => response.json())
+            .then(data => {
+                // Access the fetched data
+                const id = data.id;
+                const steamId = data.steamId;
+                const steamName = data.steamName;
+                const decodedDescription = JSON.stringify(data.boughtServicesJson).replace(/\\u20B4/g, '₴').replace(/\\/g, '').replace(/n/g, '');
+                const balance = data.balance;
+
+                // Create an HTML string to display the data
+                const htmlContent = `
+                    <p><strong>ID:</strong> ${id}</p>
+                    <p><strong>Steam ID:</strong> ${steamId}</p>
+                    <p><strong>Steam Name:</strong> ${steamName}</p>
+                    <p><strong>Bought Services JSON:</strong> ${decodedDescription}</p>
+                    <p><strong>Balance:</strong> ${balance}</p>
+                `;
+
+                // Insert the HTML content into the dataContainer div
+                document.getElementById('dataContainer').innerHTML = htmlContent;
+            })
+            .catch(error => {
+                console.error('An error occurred:', error);
+            });
+    </script>
+</body>
+
+</html>

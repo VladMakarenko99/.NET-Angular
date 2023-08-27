@@ -49,7 +49,7 @@ namespace API.Controllers
                 }
             }
             catch (Exception) { return BadRequest("Invalid json"); }
-
+            System.Console.WriteLine($"{purchase.Service} + {purchase.SteamId}");
             await _serviceRepository.BuyServiceAsync(purchase.Service, purchase.SteamId);
             return Ok("Service was bought successfully");
         }

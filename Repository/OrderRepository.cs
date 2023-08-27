@@ -19,7 +19,6 @@ namespace API.Repository
         {
             var order = await _context.Orders.FirstOrDefaultAsync(x => x.Id == orderId);
             var user = await _context.Users.FirstOrDefaultAsync(x => x.SteamId == order!.SteamId);
-
             user!.Balance += order!.Amount;
             _context.Update(user);
 

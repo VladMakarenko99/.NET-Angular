@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.VisualBasic;
 
 namespace API.Models
 {
@@ -32,12 +33,19 @@ namespace API.Models
 
         public string Status { get; set; }
 
-        public Order(string Id, double Amount, string SteamId, string Status)
+        public DateTime Date { get; set; }
+        public Order(string Id, double Amount, string SteamId, string Status, DateTime Date)
         {
             this.Id = Id;
             this.Amount = Amount;
             this.SteamId = SteamId;
             this.Status = Status;
+            this.Date = Date;
+        }
+        public static Order CreateWithCurrentDateTimeInKyiv(string Id, double Amount, string SteamId, string Status)
+        {
+            var currentDateTimeUtc = DateTime.UtcNow;
+            return new Order(Id, Amount, SteamId, Status, currentDateTimeUtc);
         }
     }
     public class TopUpPurchase

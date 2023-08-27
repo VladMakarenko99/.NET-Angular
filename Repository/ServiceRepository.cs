@@ -4,6 +4,8 @@ using API.Data;
 using API.Interfaces;
 using API.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Encodings.Web;
+using System.Text.Unicode;
 
 namespace API.Repository
 {
@@ -52,8 +54,14 @@ namespace API.Repository
         {
             serviceList!.Add(service!);
 
-            string serviceListJson = JsonSerializer.Serialize(serviceList);
-            userToUpdate.BoughtServicesJson = serviceListJson;
+            var options1 = new JsonSerializerOptions
+            {
+                Encoder = JavaScriptEncoder.Create(UnicodeRanges.BasicLatin, UnicodeRanges.Cyrillic),
+                WriteIndented = true
+            };
+            string serviceListJson = JsonSerializer.Serialize(serviceList, options1);
+            userToUpdate.BoughtServicesJson = Regex.Replace(serviceListJson, @"\\u20B4", "₴");
+            System.Console.WriteLine(serviceListJson);
             _context.Update(userToUpdate);
             await _context.SaveChangesAsync();
         }

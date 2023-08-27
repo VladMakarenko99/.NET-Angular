@@ -1,4 +1,5 @@
 using System.Net.Http.Headers;
+using System.Runtime.Intrinsics.Arm;
 using System.Security.Cryptography;
 using System.Text;
 using API.Interfaces;
@@ -26,8 +27,8 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        [Route("/test-payment")]
-        public async Task<IActionResult> Pay([FromBody] TopUpPurchase purchase)
+        [Route("/api/top-up")]
+        public async Task<IActionResult> TopUpBalance([FromBody] TopUpPurchase purchase)
         {
             try
             {
@@ -57,24 +58,17 @@ namespace API.Controllers
                 currency = "UAH",
                 description = "Оплата послуги на Asmodeus Project",
                 order_id = orderId,
-                result_url = $"https://asmodeus.bsite.net/api/success-payment/{orderId}",
-                //result_url = $"https://localhost:7234/api/success-payment/{orderId}",
-                customer_user_id = purchase.SteamId,
+                result_url = $"https://localhost:7234/api/payment-response",
+                //result_url = $"https://asmodeus.bsite.net/api/success-payment/{orderId}",
             };
 
             var requestDataJson = Newtonsoft.Json.JsonConvert.SerializeObject(requestData);
 
             var requestDataEncoded = Convert.ToBase64String(Encoding.UTF8.GetBytes(requestDataJson));
-            var signString = privateKey + requestDataEncoded + privateKey;
 
-            string signature = "";
-            using (SHA1 sha1 = SHA1.Create())
-            {
-                byte[] hashBytes = sha1.ComputeHash(Encoding.UTF8.GetBytes(signString));
-                signature = Convert.ToBase64String(hashBytes);
-            }
+            string signature = CalculateSignature(privateKey!, requestDataEncoded);
 
-            var order = new Order(orderId, purchase.Amount, purchase.SteamId, "processing");
+            var order = Order.CreateWithCurrentDateTimeInKyiv(orderId, purchase.Amount, purchase.SteamId, "processing");
             await _orderRepository.CreateOrderAsync(order);
 
             var paymentUrl = $"https://www.liqpay.ua/api/3/checkout?data={requestDataEncoded}&signature={signature}";
@@ -82,61 +76,51 @@ namespace API.Controllers
             return Ok(paymentUrl);
         }
 
-        [HttpGet]
-        [Route("/api/success-payment/{orderId}")]
-        public async Task<IActionResult> SuccessPayment(string orderId)
+        [HttpPost]
+        [Route("/api/payment-response")]
+        public async Task<IActionResult> SuccessPayment()
         {
-            var publicKey = _configuration["LiqPayPublicKey"];
+            string? postData = Request.Form["data"];
+            string? postSignature = Request.Form["signature"];
             var privateKey = _configuration["LiqPayPrivateKey"];
-            var requestData = new
+
+            if (postData != null || postSignature != null)
             {
-                action = "status",
-                version = 3,
-                public_key = publicKey,
-                order_id = orderId
-            };
-            var requestDataJson = Newtonsoft.Json.JsonConvert.SerializeObject(requestData);
-
-            var requestDataEncoded = Convert.ToBase64String(Encoding.UTF8.GetBytes(requestDataJson));
-            var signString = privateKey + requestDataEncoded + privateKey;
-
-            string signature = "";
-            using (SHA1 sha1 = SHA1.Create())
-            {
-                byte[] hashBytes = sha1.ComputeHash(Encoding.UTF8.GetBytes(signString));
-                signature = Convert.ToBase64String(hashBytes);
-            }
-
-            var encodedRequestData = Uri.EscapeDataString(requestDataEncoded);
-
-            var formData = new StringContent($"data={encodedRequestData}&signature={signature}");
-            formData.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
-
-            var response = await _httpClient.PostAsync("https://www.liqpay.ua/api/request", formData);
-            if (response.IsSuccessStatusCode)
-            {
-                var responseContent = await response.Content.ReadAsStringAsync();
-                JObject jsonResponse = JObject.Parse(responseContent);
-                System.Console.WriteLine(jsonResponse.ToString());
-
-                string resultValue = jsonResponse["status"]!.ToString();
-
-                if (resultValue == "success")
+                string originalSignature = CalculateSignature(privateKey!, postData!);
+                if (originalSignature == postSignature)
                 {
-                    await _orderRepository.CompleteOrderAsync(orderId);
-                    return Ok($"Payment completed. \n {responseContent}");
+                    var decodedData = Encoding.UTF8.GetString(Convert.FromBase64String(postData!));
+                    JObject jsonResponse = JObject.Parse(decodedData);
+
+                    string resultValue = jsonResponse["status"]!.ToString();
+
+                    if (resultValue == "success")
+                    {
+                        await _orderRepository.CompleteOrderAsync(jsonResponse["order_id"]!.ToString());
+                        return Ok($"Payment completed. \n {decodedData}");
+                    }
+                    return BadRequest($"Payment failed. Body: \n {decodedData}");
                 }
-                return BadRequest($"Request failed. Result is not success. Body: \n {responseContent}");
+                return BadRequest("Invalid signature");
             }
-            return BadRequest();
+            return BadRequest("Post data are null");
         }
 
         private string RandomString(int length)
         {
             var random = new Random();
             const string chars = "0123456789";
-            return new (Enumerable.Repeat(chars, length)
+            return new(Enumerable.Repeat(chars, length)
                 .Select(s => s[random.Next(s.Length)]).ToArray());
+        }
+        private string CalculateSignature(string privateKey, string postData)
+        {
+            using (SHA1 sha1 = SHA1.Create())
+            {
+                var dataBytes = Encoding.UTF8.GetBytes(privateKey + postData + privateKey);
+                var hashBytes = sha1.ComputeHash(dataBytes);
+                return Convert.ToBase64String(hashBytes);
+            }
         }
     }
 }
