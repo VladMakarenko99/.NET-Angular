@@ -29,19 +29,21 @@ namespace API.Controllers
         {
             try
             {
-                if (!await _serviceRepository.IsUserExistAsync(purchase.SteamId))
+                if (!await _userRepository.IsUserExistAsync(purchase.SteamId))
                     ModelState.AddModelError(nameof(purchase.SteamId), "Invalid SteamId!");
+                    
                 if (string.IsNullOrEmpty(purchase.Service.SelectedOption))
                     ModelState.AddModelError(nameof(purchase.Service.SelectedOption), "Selected option is null!");
+
                 if (!Array.Exists(purchase.Service.OptionsToSelect, opt => opt == purchase.Service.SelectedOption))
                     ModelState.AddModelError(nameof(purchase.Service.SelectedOption), "Invalid selected option!");
-                string option = purchase.Service!.SelectedOption!;
-                string pattern = @"\d+";
-                MatchCollection matches = Regex.Matches(option, pattern);
-                double price = Convert.ToDouble(matches[0].Value);
+
+                double price = ExtractPriceFromSelectedOption(purchase.Service.SelectedOption!);
                 var user = await _userRepository.GetBySteamIdAsync(purchase.SteamId);
+
                 if (user!.Balance < price)
                     ModelState.AddModelError("UserBalance", "Not enough money on userʼs balance!");
+                    
                 if (!ModelState.IsValid)
                 {
                     var errors = ModelState.Values.SelectMany(x => x.Errors.Select(e => e.ErrorMessage));
@@ -49,29 +51,23 @@ namespace API.Controllers
                 }
             }
             catch (Exception) { return BadRequest("Invalid json"); }
-            System.Console.WriteLine($"{purchase.Service} + {purchase.SteamId}");
+
+            purchase.Service.ExpireDate = CalculateExpireDate(purchase.Service.SelectedOption!);
             await _serviceRepository.BuyServiceAsync(purchase.Service, purchase.SteamId);
             return Ok("Service was bought successfully");
         }
-
-        [HttpDelete]
-        [Route("/api/delete-services/{steamId}")]
-        public async Task<IActionResult> DeleteServices(string steamId)
+        private double ExtractPriceFromSelectedOption(string selectedOption)
         {
-            try
-            {
-                if (!string.IsNullOrEmpty(steamId))
-                {
-                    await _serviceRepository.DeleteBoughtServicesAsync(steamId);
-                    return Ok("Services have been successfully deleted");
-                }
-                else
-                    return BadRequest("Incorrect service id or user id");
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.InnerException);
-            }
+            string pattern = @"\d+";
+            MatchCollection matches = Regex.Matches(selectedOption, pattern);
+            return Convert.ToDouble(matches[0].Value);
+        }
+        private string CalculateExpireDate(string selectedOption)
+        {
+            Regex regex = new Regex(@"- (\d+)дн");
+            Match match = regex.Match(selectedOption);
+            double value = Convert.ToDouble(match.Groups[1].Value);
+            return DateTime.Now.ToLocalTime().AddDays(value).ToString();
         }
     }
 }

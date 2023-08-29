@@ -38,54 +38,35 @@ namespace API.Repository
             user.Balance -= price;
             _context.Update(user);
             await _context.SaveChangesAsync();
-
-
         }
 
-        public async Task DeleteBoughtServicesAsync(string steamId)
+        public async Task RemoveExpiredServicesAsync(List<Service> expiredService, string steamId)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(x => x.SteamId == steamId);
-            user!.BoughtServicesJson = null;
+            var user = await _context.Users.FirstAsync(x => x.SteamId == steamId);
+            var userServices = JsonSerializer.Deserialize<List<Service>>(user.BoughtServicesJson!);
+
+            userServices!.RemoveAll(userService => expiredService.Any(expiredService => expiredService.Id == userService.Id));
+            if (userServices.Count == 0)
+                user.BoughtServicesJson = null;
+            else
+            {
+                string serviceListJson = JsonSerializer.Serialize(userServices,
+                new JsonSerializerOptions { Encoder = JavaScriptEncoder.Create(UnicodeRanges.BasicLatin, UnicodeRanges.Cyrillic) });
+                user.BoughtServicesJson = Regex.Replace(serviceListJson, @"\\u20B4", "₴");
+            }
+
             _context.Update(user);
             await _context.SaveChangesAsync();
         }
-
         private async Task UpdateUserBoughtServicesAsync(User userToUpdate, Service service, List<Service> serviceList)
         {
             serviceList!.Add(service!);
 
-            var options1 = new JsonSerializerOptions
-            {
-                Encoder = JavaScriptEncoder.Create(UnicodeRanges.BasicLatin, UnicodeRanges.Cyrillic),
-                WriteIndented = true
-            };
-            string serviceListJson = JsonSerializer.Serialize(serviceList, options1);
+            string serviceListJson = JsonSerializer.Serialize(serviceList,
+            new JsonSerializerOptions { Encoder = JavaScriptEncoder.Create(UnicodeRanges.BasicLatin, UnicodeRanges.Cyrillic) });
             userToUpdate.BoughtServicesJson = Regex.Replace(serviceListJson, @"\\u20B4", "₴");
-            System.Console.WriteLine(serviceListJson);
             _context.Update(userToUpdate);
             await _context.SaveChangesAsync();
-        }
-
-        public async Task<bool> IsUserExistAsync(string steamId)
-        {
-            var user = await _context.Users.FirstOrDefaultAsync(x => x.SteamId == steamId);
-            if (user != null)
-                return true;
-            return false;
-        }
-        public async Task DeleteLastBoughtServiceAsync(string steamId)
-        {
-            var user = await _context.Users.FirstOrDefaultAsync(x => x.SteamId == steamId);
-            var serviceList = new List<Service>();
-            if (user!.BoughtServicesJson != null)
-            {
-                serviceList = JsonSerializer.Deserialize<List<Service>>(user.BoughtServicesJson);
-                serviceList!.RemoveAt(serviceList.Count - 1);
-                user.BoughtServicesJson = JsonSerializer.Serialize(serviceList);
-                _context.Update(user);
-                await _context.SaveChangesAsync();
-            }
-
         }
     }
 }

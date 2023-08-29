@@ -19,14 +19,16 @@ namespace API.Repository
             await _context.SaveChangesAsync();
         }
 
-        public async Task<User?> GetBySteamIdAsync(string steamId)
-        {
-            return await _context.Users.FirstOrDefaultAsync(x => x.SteamId == steamId);
-        }
+        public async Task<User?> GetBySteamIdAsync(string steamId) => await _context.Users.FirstOrDefaultAsync(x => x.SteamId == steamId);
 
-        public async Task<List<User>> GetUsersAsync()
+        public async Task<List<User>> GetUsersAsync() => await _context.Users.ToListAsync();
+
+        public async Task<bool> IsUserExistAsync(string steamId)
         {
-            return await _context.Users.ToListAsync();
+            var user = await _context.Users.FirstOrDefaultAsync(x => x.SteamId == steamId);
+            if (user != null)
+                return true;
+            return false;
         }
     }
 }

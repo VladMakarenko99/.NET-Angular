@@ -3,7 +3,7 @@ using API.Data;
 using API.Interfaces;
 using API.Repository;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Cors;
+using API;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +40,9 @@ builder.Services.AddTransient<IOrderRepository, OrderRepository>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
         options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+        
+builder.Services.AddHostedService<ExpiredServicesCleanupService>();
+
 
 var app = builder.Build();
 
@@ -54,7 +57,6 @@ app.UseStaticFiles();
 app.UseAuthorization();
 
 app.UseCors(options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
-//app.UseMvc();
 app.MapControllers();
 app.UseAuthentication();
 app.UseAuthorization();

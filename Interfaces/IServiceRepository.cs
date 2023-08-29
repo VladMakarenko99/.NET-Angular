@@ -8,8 +8,6 @@ namespace API.Interfaces
 
         public Task BuyServiceAsync(Service service, string steamId);
 
-        public Task DeleteBoughtServicesAsync(string steamId);
-        public Task<bool> IsUserExistAsync(string steamId);
-        public Task DeleteLastBoughtServiceAsync(string steamId);
+        public Task RemoveExpiredServicesAsync(List<Service> expiredService, string steamId);
     }
 }

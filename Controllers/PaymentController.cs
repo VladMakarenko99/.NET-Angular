@@ -16,14 +16,20 @@ namespace API.Controllers
         private readonly IConfiguration _configuration;
         private readonly IServiceRepository _serviceRepository;
         private readonly IOrderRepository _orderRepository;
+        private readonly IUserRepository _userRepository;
 
 
-        public PaymentController(HttpClient _httpClient, IConfiguration _configuration, IServiceRepository _serviceRepository, IOrderRepository _orderRepository)
+        public PaymentController(HttpClient _httpClient,
+            IConfiguration _configuration,
+            IServiceRepository _serviceRepository,
+            IOrderRepository _orderRepository,
+            IUserRepository _userRepository)
         {
             this._httpClient = _httpClient;
             this._configuration = _configuration;
             this._serviceRepository = _serviceRepository;
             this._orderRepository = _orderRepository;
+            this._userRepository = _userRepository;
         }
 
         [HttpPost]
@@ -32,7 +38,7 @@ namespace API.Controllers
         {
             try
             {
-                if (!await _serviceRepository.IsUserExistAsync(purchase.SteamId))
+                if (!await _userRepository.IsUserExistAsync(purchase.SteamId))
                     ModelState.AddModelError(nameof(purchase.SteamId), "Invalid SteamId!");
                 if (purchase.Amount <= 0)
                     ModelState.AddModelError(nameof(purchase.Amount), "The sum must be above zero!");
@@ -59,7 +65,7 @@ namespace API.Controllers
                 description = "Оплата послуги на Asmodeus Project",
                 order_id = orderId,
                 result_url = $"https://localhost:7234/api/payment-response",
-                //result_url = $"https://asmodeus.bsite.net/api/success-payment/{orderId}",
+                //result_url = $"https://asmodeus.bsite.net/api/payment-response",
             };
 
             var requestDataJson = Newtonsoft.Json.JsonConvert.SerializeObject(requestData);
@@ -80,30 +86,37 @@ namespace API.Controllers
         [Route("/api/payment-response")]
         public async Task<IActionResult> SuccessPayment()
         {
-            string? postData = Request.Form["data"];
-            string? postSignature = Request.Form["signature"];
-            var privateKey = _configuration["LiqPayPrivateKey"];
-
-            if (postData != null || postSignature != null)
+            try
             {
-                string originalSignature = CalculateSignature(privateKey!, postData!);
-                if (originalSignature == postSignature)
+                string? postData = Request.Form["data"];
+                string? postSignature = Request.Form["signature"];
+                var privateKey = _configuration["LiqPayPrivateKey"];
+
+                if (postData != null || postSignature != null)
                 {
-                    var decodedData = Encoding.UTF8.GetString(Convert.FromBase64String(postData!));
-                    JObject jsonResponse = JObject.Parse(decodedData);
-
-                    string resultValue = jsonResponse["status"]!.ToString();
-
-                    if (resultValue == "success")
+                    string originalSignature = CalculateSignature(privateKey!, postData!);
+                    if (originalSignature == postSignature)
                     {
-                        await _orderRepository.CompleteOrderAsync(jsonResponse["order_id"]!.ToString());
-                        return Ok($"Payment completed. \n {decodedData}");
+                        var decodedData = Encoding.UTF8.GetString(Convert.FromBase64String(postData!));
+                        JObject jsonResponse = JObject.Parse(decodedData);
+
+                        string statusValue = jsonResponse["status"]!.ToString();
+
+                        if (statusValue == "success")
+                        {
+                            await _orderRepository.CompleteOrderAsync(jsonResponse["order_id"]!.ToString());
+                            return Ok($"Payment completed. \n Status: {statusValue}");
+                        }
+                        return BadRequest($"Payment failed. Status: \n {statusValue}");
                     }
-                    return BadRequest($"Payment failed. Body: \n {decodedData}");
+                    return BadRequest("Invalid signature");
                 }
-                return BadRequest("Invalid signature");
+                return BadRequest("Post data are null");
             }
-            return BadRequest("Post data are null");
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         private string RandomString(int length)

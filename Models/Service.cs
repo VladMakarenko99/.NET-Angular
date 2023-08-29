@@ -18,5 +18,6 @@ namespace API.Models
 
         public string? SelectedOption { get; set; }
 
+        public string? ExpireDate {get; set;}
     }
 }
