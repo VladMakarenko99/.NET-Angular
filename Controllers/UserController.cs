@@ -3,6 +3,7 @@ using API.Models;
 using AspNet.Security.OpenId.Steam;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Unicode;
@@ -35,6 +36,14 @@ namespace API.Controllers
                 return BadRequest("User could not be found");
 
             return Ok(user);
+        }
+
+        [HttpGet("/api/user")]
+        public IActionResult GetCurrentUser()
+        {
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
+            var id = User.FindFirst(ClaimTypes.Surname)?.Value;
+            return Ok(id);
         }
     }
 }
