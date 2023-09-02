@@ -6,8 +6,13 @@ using Microsoft.AspNetCore.Authorization;
 using API.Interfaces;
 using API.Models;
 using Newtonsoft.Json;
+using System.Security.Claims;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using System.IdentityModel.Tokens.Jwt;
 
-[Route("[controller]")]
+namespace API.Controllers;
+[Route("api")]
 public class AuthController : Controller
 {
     private readonly IUserRepository _repository;
@@ -19,8 +24,7 @@ public class AuthController : Controller
         this._configuration = _configuration;
     }
 
-    [HttpGet]
-    [Route("/steam-signin")]
+    [HttpGet("steam-signin")]
     public IActionResult SteamSignIn()
     {
         if (User!.Identity!.IsAuthenticated)
@@ -33,8 +37,7 @@ public class AuthController : Controller
         return Challenge(authProperties, SteamAuthenticationDefaults.AuthenticationScheme);
     }
 
-    [Route("/steam-response")]
-    [HttpGet]
+    [HttpGet("steam-response")]
     public async Task<IActionResult> SteamResponse()
     {
         var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
@@ -57,24 +60,52 @@ public class AuthController : Controller
 
         string steamName = json!.response.players[0].personaname;
 
-        if (await _repository.GetBySteamIdAsync(steamId) == null)
+        var user = await _repository.GetBySteamIdAsync(steamId);
+        if (user == null)
         {
-            var user = new User(steamId, steamName, null, 0);
+            user = new User(steamId, steamName, null, 0);
 
             await _repository.CreateUserAsync(user);
-            return Ok($"User has been created and successfully authenticated. SteamId: {steamId}; SteamName: {steamName}");
+            return Ok(new
+            {
+                token = GenerateToken(user),
+                user_created = true
+            });
         }
-
-        return Ok($"Authenticated. SteamId: {steamId}; SteamName: {steamName}");
+        return Ok(GenerateToken(user));
     }
 
-    [HttpGet]
-    [Route("/check-auth")]
+    [HttpGet("check-auth")]
     [Authorize(AuthenticationSchemes = SteamAuthenticationDefaults.AuthenticationScheme)]
     public IActionResult CheckAuthentication() => Ok("User is authenticated.");
 
-    [HttpGet]
-    [Route("/signout")]
+    [HttpGet("signout")]
     public IActionResult SignOutCurrentUser() => SignOut(new AuthenticationProperties { RedirectUri = "/" }, CookieAuthenticationDefaults.AuthenticationScheme);
 
+    private string GenerateToken(User user)
+    {
+        var key = _configuration["Jwt:Key"];
+        var issuer = _configuration["Jwt:Issuer"];
+        var audience = _configuration["Jwt:Audience"];
+        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key!));
+        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+        var claims = new[]
+        {
+            new Claim("SteamId", user.SteamId),
+            new Claim("SteamName", user.SteamName),
+            new Claim("BoughtServicesJson", user.BoughtServicesJson ?? ""),
+            new Claim("Balance", user.Balance.ToString()),
+        };
+
+        var token = new JwtSecurityToken(
+         issuer,
+          audience,
+          claims,
+          null,
+          DateTime.Now.AddHours(12),
+          credentials);
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
 }
