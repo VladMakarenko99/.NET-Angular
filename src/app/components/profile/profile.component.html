@@ -1,0 +1,17 @@
+<div class="container mt-5">
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Профіль користувача</h5>
+            <div class="profile">
+              <p class="mb-1"><strong>SteamId: </strong> <a href='https://steamcommunity.com/profiles/{{currentUser?.steamId}}' class="mb-1">{{currentUser?.steamId}}</a></p>
+              <p class="mb-1"><strong>Імʼя:</strong> {{currentUser?.steamName}}</p>
+              <p class="mb-1"><strong>Баланс:</strong> {{currentUser?.balance}} ₴</p>
+              <p class="mb-1" *ngIf="currentUser?.boughtServicesJson"><strong>Куплені послуги:</strong> {{currentUser?.boughtServicesJson}}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
