@@ -15,11 +15,9 @@ namespace API.Models
         [Required(ErrorMessage = "The 'steamId' field is required.")]
         public string SteamId { get; set; }
 
-        public Purchase(Service service, string steamId)
-        {
-            this.Service = service;
-            this.SteamId = steamId;
-        }
+        public Purchase(Service service, string steamId) =>
+            (Service, SteamId) = (service, steamId);
+        
     }
     public class Order
     {

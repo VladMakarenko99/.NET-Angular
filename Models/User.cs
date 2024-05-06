@@ -1,8 +1,9 @@
-using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 namespace API.Models;
 public class User
 {
+    public User(string steamId, string steamName, string? boughtServicesJson, double balance) =>
+    (SteamId, SteamName, BoughtServicesJson, Balance) = (steamId, steamName, boughtServicesJson, balance);
+
     public int Id { get; set; }
 
     public string SteamId { get; set; }
@@ -12,11 +13,4 @@ public class User
     public string? BoughtServicesJson { get; set; }
 
     public double Balance { get; set; }
-    public User(string SteamId, string SteamName, string? BoughtServicesJson, double Balance)
-    {
-        this.SteamId = SteamId;
-        this.SteamName = SteamName;
-        this.BoughtServicesJson = BoughtServicesJson;
-        this.Balance = Balance;
-    }
 }

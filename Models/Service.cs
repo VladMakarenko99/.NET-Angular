@@ -2,12 +2,8 @@ namespace API.Models
 {
     public class Service
     {
-        public Service(string name, string description, string[] OptionsToSelect)
-        {
-            this.Name = name;
-            this.Description = description;
-            this.OptionsToSelect = OptionsToSelect;
-        }
+        public Service(string name, string description, string[] optionsToSelect) =>
+        (Name, Description, OptionsToSelect) = (name, description, optionsToSelect);
         public int Id { get; set; }
 
         public string Name { get; set; }
@@ -18,6 +14,6 @@ namespace API.Models
 
         public string? SelectedOption { get; set; }
 
-        public string? ExpireDate {get; set;}
+        public string? ExpireDate { get; set; }
     }
 }

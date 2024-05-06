@@ -52,7 +52,7 @@ public class AuthController : Controller
         int lastSlashIndex = steamIdClaim.Value.LastIndexOf('/');
         string steamId = steamIdClaim.Value.Substring(lastSlashIndex + 1);
 
-        string apiKey = _configuration["SteamApaKey"] ?? "";
+        string apiKey = _configuration["SteamApiKey"] ?? "";
         HttpResponseMessage httpResponseMessage = await new HttpClient()
         .GetAsync($"http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key={apiKey}&steamids={steamId}");
         var jsonResponse = await httpResponseMessage.Content.ReadAsStringAsync();
@@ -72,7 +72,10 @@ public class AuthController : Controller
                 user_created = true
             });
         }
-        return Ok(GenerateToken(user));
+        //return Ok(GenerateToken(user));
+        var token = GenerateToken(user);
+        System.Console.WriteLine(token);
+        return Redirect("http://localhost:4200/?token=" + token);
     }
 
     [HttpGet("check-auth")]
@@ -80,7 +83,7 @@ public class AuthController : Controller
     public IActionResult CheckAuthentication() => Ok("User is authenticated.");
 
     [HttpGet("signout")]
-    public IActionResult SignOutCurrentUser() => SignOut(new AuthenticationProperties { RedirectUri = "/" }, CookieAuthenticationDefaults.AuthenticationScheme);
+    public IActionResult SignOutCurrentUser() => SignOut(new AuthenticationProperties { RedirectUri = "http://localhost:4200/" }, CookieAuthenticationDefaults.AuthenticationScheme);
 
     private string GenerateToken(User user)
     {

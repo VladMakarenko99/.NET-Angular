@@ -58,7 +58,7 @@ public class PaymentController : Controller
             currency = "UAH",
             description = "Оплата послуги на Asmodeus Project",
             order_id = orderId,
-            result_url = $"https://localhost:7234/api/payment-response",
+            result_url = $"https://localhost:7234/api/payment/response",
             //result_url = $"https://asmodeus.bsite.net/api/payment-response",
         };
 
