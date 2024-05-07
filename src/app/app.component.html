@@ -7,8 +7,11 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
       <div class="navbar-nav">
-        <a class="nav-link" [routerLink]="['services']">Послуги</a>
-        <a class="nav-link" href="https://localhost:7234/steam-signin">Авторизуватись</a>
+        <a class="nav-link" *ngIf="!isAuthenticated" href="https://localhost:7234/api/steam-signin">Авторизуватись</a>
+        <!-- <a class="nav-link" [routerLink]="['services']">Послуги</a> -->
+        <a class="nav-link" [routerLink]="['profile']">{{ this.currentUser?.steamName }}</a>
+        <span *ngIf="isAuthenticated">{{ this.currentUser?.balance }} ₴</span>
+        <button *ngIf="isAuthenticated" class="btn btn-outline-light btn-sm" (click)="signOut()">Вихід</button>
       </div>
     </div>
   </div>
