@@ -1,0 +1,21 @@
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+
+}
+
+input {
+    margin: 20px 0 0 0;
+    width: 50%;
+}
+
+button {
+    margin-top: 20px;
+}
+
+.invalid {
+    color: red;
+}
+.input-invalid{
+    border-color: red;
+}

@@ -1,5 +1,5 @@
 export interface Service {
-    id: number;
+    id: string;
 
     name: string;
 
@@ -7,6 +7,7 @@ export interface Service {
 
     optionsToSelect: string[];
 
-    SelectedOption: string;
+    selectedOption: string;
 
+    expireDate: string;
 }

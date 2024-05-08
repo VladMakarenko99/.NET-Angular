@@ -5,10 +5,16 @@
           <div class="card-body">
             <h5 class="card-title">Профіль користувача</h5>
             <div class="profile">
-              <p class="mb-1"><strong>SteamId: </strong> <a href='https://steamcommunity.com/profiles/{{currentUser?.steamId}}' class="mb-1">{{currentUser?.steamId}}</a></p>
-              <p class="mb-1"><strong>Імʼя:</strong> {{currentUser?.steamName}}</p>
-              <p class="mb-1"><strong>Баланс:</strong> {{currentUser?.balance}} ₴</p>
-              <p class="mb-1" *ngIf="currentUser?.boughtServicesJson"><strong>Куплені послуги:</strong> {{currentUser?.boughtServicesJson}}</p>
+              <p class="mb-2"><strong>SteamId: </strong> <a href='https://steamcommunity.com/profiles/{{currentUser?.steamId}}' class="mb-1">{{currentUser?.steamId}}</a></p>
+              <p class="mb-2"><strong>Імʼя:</strong> {{currentUser?.steamName}}</p>
+              <p class="mb-2 balance"><strong>Баланс:</strong> {{currentUser?.balance}} ₴<a [routerLink]="['../top-up']" class="btn btn-secondary btn-sm ml-2">Поповнити</a></p>
+              <p class="mb-2" *ngIf="currentUser?.boughtServicesJson"><strong>Придбані послуги:</strong> </p>
+              <div *ngFor="let service of boughtServicesData">
+                <p class="mb-1"><strong>Назва послуги:</strong> {{service.name}}</p>
+                <p class="mb-1"><strong>Обраний тариф:</strong> {{ service.selectedOption }}</p>
+                <p class="mb-1"><strong>Дата закінчення:</strong> {{ service.expireDate }}</p>
+              </div>
+              <p class="mb-2" *ngIf="!currentUser?.boughtServicesJson"><strong>Поки що нема придбаних послуг</strong> </p>
             </div>
           </div>
         </div>

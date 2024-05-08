@@ -10,13 +10,13 @@
       </thead>
       <tbody>
         <tr *ngFor="let service of services">
-          <td>{{service.name}}</td>
+          <td><h4>{{service.name}}</h4></td>
           <td>{{service.description}}</td>
           <td>
             <div *ngFor="let option of service.optionsToSelect">
               <span>{{option}}</span>
             </div>
-            <button>Придбати</button>
+            <button class="btn btn-dark btn-sm">Придбати</button>
           </td>
         </tr>
       </tbody>
