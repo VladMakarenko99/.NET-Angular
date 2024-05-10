@@ -15,7 +15,8 @@ export class ProfileComponent implements OnInit {
 
   ngOnInit(): void {
     this.authService.getCurrentUser()
-      .subscribe((result: User) => {
+      .subscribe((result: User | null) => {
+        if(result !== null)
         this.currentUser = result;
         if (this.currentUser?.boughtServicesJson) {
           const parsedServices = JSON.parse(this.currentUser.boughtServicesJson);

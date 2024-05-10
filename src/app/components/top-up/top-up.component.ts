@@ -21,7 +21,7 @@ export class TopUpComponent implements OnInit {
 
   ngOnInit(): void {
     this.authService.getCurrentUser()
-      .subscribe((result: User) => this.topUpData.steamId = result.steamId);
+      .subscribe((result: User | null) => this.topUpData.steamId = result!.steamId);
   }
 
   isSubmited = false;

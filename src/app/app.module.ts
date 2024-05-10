@@ -10,6 +10,8 @@ import { AuthInterceptor } from './services/auth.interceptor';
 import { ProfileComponent } from './components/profile/profile.component';
 import { HomeComponent } from './components/home/home.component';
 import { TopUpComponent } from './components/top-up/top-up.component';
+import { PurchaseComponent } from './components/purchase/purchase.component';
+import { SuccessComponent } from './components/success/success.component';
 
 
 @NgModule({
@@ -17,7 +19,9 @@ import { TopUpComponent } from './components/top-up/top-up.component';
     AppComponent,
     ProfileComponent,
     HomeComponent,
-    TopUpComponent
+    TopUpComponent,
+    PurchaseComponent,
+    SuccessComponent
   ],
   imports: [
     BrowserModule,

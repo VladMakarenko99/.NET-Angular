@@ -16,7 +16,7 @@
             <div *ngFor="let option of service.optionsToSelect">
               <span>{{option}}</span>
             </div>
-            <button class="btn btn-dark btn-sm">Придбати</button>
+            <button class="btn btn-dark btn-sm" [routerLink]="['/buy', service.id]">Придбати</button>
           </td>
         </tr>
       </tbody>

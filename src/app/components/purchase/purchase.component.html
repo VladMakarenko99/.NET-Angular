@@ -1,0 +1,25 @@
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Придбання послуги</h5>
+                    <div>
+                        <p><strong>Назва: </strong>{{service?.name}}</p>
+                        <p><strong>Опис: </strong>{{service?.description}}</p>
+                    </div>
+                    <form [formGroup]="purchaseForm" (ngSubmit)="submitForm()">
+                        <div class="form-group">
+                            <label for="selectedOption">Оберіть тариф:</label>
+                            <select class="form-control" id="selectedOption" formControlName="selectedOption" >
+                                <option *ngFor="let option of service?.optionsToSelect">{{ option }}</option>
+                            </select>
+
+                        </div>
+                        <button type="submit" class="btn btn-dark">Придбати</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
