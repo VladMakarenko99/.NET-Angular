@@ -5,6 +5,7 @@ import { User } from './models/user.model';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
+import { environment } from 'src/environments/environment';
 
 
 @Component({
@@ -17,6 +18,7 @@ export class AppComponent implements OnInit {
   isAuthenticated = false;
   currentUser?: User;
   private routerSubscription: Subscription | undefined;
+  public environment = environment;
 
   constructor(private getServicesService: GetServicesService,
     private authService: AuthService,

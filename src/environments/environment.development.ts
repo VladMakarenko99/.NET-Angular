@@ -1,3 +1,4 @@
 export const environment = {
-    apiUrl: "https://localhost:7234/api"
+    production: true,
+    apiUrl: "https://asmodeusproject.bsite.net/api"
 };
