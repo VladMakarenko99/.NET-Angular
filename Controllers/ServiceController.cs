@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using API.Interfaces;
 using API.Models;
@@ -21,7 +22,10 @@ public class ServiceController : Controller
     [HttpGet]
     public async Task<IActionResult> GetServices() => Ok(await _serviceRepository.GetServicesAsync());
 
-    [HttpPost]
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetServiceseById(int id) => Ok(await _serviceRepository.GetServiceByIdAsync(id));
+
+    [HttpPost("buy")]
     [Authorize(AuthenticationSchemes = "Bearer")]
     public async Task<IActionResult> BuyService([FromBody] Purchase purchase)
     {
@@ -52,7 +56,7 @@ public class ServiceController : Controller
 
         purchase.Service.ExpireDate = CalculateExpireDate(purchase.Service.SelectedOption!);
         await _serviceRepository.BuyServiceAsync(purchase.Service, purchase.SteamId);
-        return Ok("Service was bought successfully");
+        return Ok();
     }
     private double ExtractPriceFromSelectedOption(string selectedOption)
     {

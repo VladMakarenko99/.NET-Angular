@@ -75,7 +75,7 @@ public class AuthController : Controller
         //return Ok(GenerateToken(user));
         var token = GenerateToken(user);
         System.Console.WriteLine(token);
-        return Redirect("http://localhost:4200/?token=" + token);
+        return Redirect($"{_configuration["ClientUrlDev"]}?token=" + token);
     }
 
     [HttpGet("check-auth")]
@@ -83,7 +83,7 @@ public class AuthController : Controller
     public IActionResult CheckAuthentication() => Ok("User is authenticated.");
 
     [HttpGet("signout")]
-    public IActionResult SignOutCurrentUser() => SignOut(new AuthenticationProperties { RedirectUri = "http://localhost:4200/" }, CookieAuthenticationDefaults.AuthenticationScheme);
+    public IActionResult SignOutCurrentUser() => SignOut(new AuthenticationProperties { RedirectUri = $"{_configuration["ClientUrlDev"]}" }, CookieAuthenticationDefaults.AuthenticationScheme);
 
     private string GenerateToken(User user)
     {

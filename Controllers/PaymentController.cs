@@ -34,8 +34,8 @@ public class PaymentController : Controller
         {
             if (!await _userRepository.IsUserExistAsync(purchase.SteamId))
                 ModelState.AddModelError(nameof(purchase.SteamId), "Invalid SteamId!");
-            if (purchase.Amount <= 0)
-                ModelState.AddModelError(nameof(purchase.Amount), "The sum must be above zero!");
+            if (purchase.Amount <= 19)
+                ModelState.AddModelError(nameof(purchase.Amount), "The sum must be above 20!");
             if (!ModelState.IsValid)
             {
                 var errors = ModelState.Values.SelectMany(x => x.Errors.Select(e => e.ErrorMessage));
@@ -58,8 +58,8 @@ public class PaymentController : Controller
             currency = "UAH",
             description = "Оплата послуги на Asmodeus Project",
             order_id = orderId,
-            result_url = $"https://localhost:7234/api/payment/response",
-            //result_url = $"https://asmodeus.bsite.net/api/payment-response",
+            result_url = $"https://asmodeusproject.bsite.net/api/payment/response",
+            //result_url = $"https://asmodeusproject.bsite.net/api/payment-response",
         };
 
         var requestDataJson = Newtonsoft.Json.JsonConvert.SerializeObject(requestData);
@@ -94,11 +94,13 @@ public class PaymentController : Controller
                     JObject jsonResponse = JObject.Parse(decodedData);
 
                     string statusValue = jsonResponse["status"]!.ToString();
-
-                    if (statusValue == "success")
+                    var order = await _orderRepository.FindOrderByIdAsync(jsonResponse["order_id"]!.ToString());
+                    
+                    if (statusValue == "success" && order?.Status != "completed")
                     {
                         await _orderRepository.CompleteOrderAsync(jsonResponse["order_id"]!.ToString());
-                        return Ok($"Payment completed. \n Status: {statusValue}");
+                        //return Ok($"Payment completed. \n Status: {statusValue}");
+                        return Redirect($"{_configuration["ClientUrlDev"]}success");
                     }
                     return BadRequest($"Payment failed. Status: \n {statusValue}");
                 }

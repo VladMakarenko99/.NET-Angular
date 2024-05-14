@@ -16,6 +16,8 @@ namespace API.Repository
 
         public async Task<List<Service>> GetServicesAsync() => await _context.Services.ToListAsync();
 
+        public async Task<Service?> GetServiceByIdAsync(int id) => await _context.Services.FindAsync(id);
+
         public async Task BuyServiceAsync(Service service, string steamId)
         {
             var user = await _context.Users.FirstOrDefaultAsync(x => x.SteamId == steamId);

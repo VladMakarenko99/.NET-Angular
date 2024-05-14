@@ -24,33 +24,21 @@ public class UserController : Controller
         return Ok(await _repository.GetUsersAsync());
     }
 
-    // [HttpGet("{steamId}")]
-    // [Authorize(AuthenticationSchemes = "Bearer")]
-    // public async Task<IActionResult> GetUserBySteamId(string steamId)
-    // {
-    //     if(steamId.Contains("current"))
-    //         return Redirect("/current");
-    //     var headers = Request.Headers;
-    //     System.Console.WriteLine(headers.FirstOrDefault(z => z.Key == "Authorization"));
-    //     var user = await _repository.GetBySteamIdAsync(steamId);
-    //     if (user == null)
-    //         return NotFound("User could not be found");
-
-    //     return Ok(user);
-    // }
-
     [HttpGet("current")]
     [Authorize(AuthenticationSchemes = "Bearer")]
-    public IActionResult GetCurrentUser()
+    public async Task<IActionResult> GetCurrentUser()
     {
-        string? name = HttpContext.User.FindFirstValue("SteamName");
         string? id = HttpContext.User.FindFirstValue("SteamId");
-        string? boughtServicesJson = HttpContext.User.FindFirstValue("BoughtServicesJson");
-        string? balance = HttpContext.User.FindFirstValue("Balance");
 
-        if (name != null && id != null)
+        if (id != null)
         {
-            var user = new User(id, name, boughtServicesJson, Convert.ToDouble(balance));
+            var user = await _repository.GetBySteamIdAsync(id);
+
+            string? name = user!.SteamName;;
+            string? boughtServicesJson = user!.BoughtServicesJson;
+            string? balance = Convert.ToString(user.Balance);
+            
+            user = new User(id, name, boughtServicesJson, Convert.ToDouble(balance));
             return Ok(user);
         }
         return BadRequest();

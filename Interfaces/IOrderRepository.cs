@@ -12,5 +12,6 @@ namespace API.Interfaces
 
         public Task CompleteOrderAsync(string orderId);
 
+        public Task<Order?> FindOrderByIdAsync(string id);
     }
 }

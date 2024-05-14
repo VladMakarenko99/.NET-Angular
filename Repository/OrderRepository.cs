@@ -26,5 +26,8 @@ namespace API.Repository
             _context.Update(order);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<Order?> FindOrderByIdAsync(string id) => await _context.Orders.FirstOrDefaultAsync(x => x.Id == id);
+       
     }
 }
