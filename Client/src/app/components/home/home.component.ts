@@ -16,4 +16,5 @@ export class HomeComponent implements OnInit {
        .subscribe((result: Service[]) => this.services = result);
   }
   
+  
 }

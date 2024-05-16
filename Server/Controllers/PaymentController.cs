@@ -100,7 +100,7 @@ public class PaymentController : Controller
                     {
                         await _orderRepository.CompleteOrderAsync(jsonResponse["order_id"]!.ToString());
                         //return Ok($"Payment completed. \n Status: {statusValue}");
-                        return Redirect($"{_configuration["ClientUrlDev"]}success");
+                        return Redirect($"{_configuration["ClientUrlProd"]}success");
                     }
                     return BadRequest($"Payment failed. Status: \n {statusValue}");
                 }
